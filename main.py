@@ -13,7 +13,7 @@ nltk.download("punkt")
 intents = [
     {
         "tag": "greeting",
-        "patterns": ["Hello", "Hi", "Hey", "How are you", "What's going on?"],
+        "patterns": ["How are you?", "Are you ok?", "Hey", "How are you", "What's going on?"],
         "responses": ["Hi there", "Hi", "Hey", "I'm fine, thank you", "Nothing"]
     },
     {
@@ -38,8 +38,8 @@ intents = [
     },
     {
         "tag": "AI",
-        "patterns": ["what is AI?", "what are different sub-fields of AI?", "Name some applications of AI?", "where can we use AI?"],
-        "responses": ["Artificial Intelligence (AI) refers to the simulation of human intelligence processes by machines, particularly computer systems", "Machine Learning, Deep learning, Natural Language Processing, Computer Vision, and robotics ", "Sure AI can be used in health care, finance, transportation, education, and entertainment"]
+        "patterns": ["what is AI?", "Define AI?", "What is the definition of AI?"],
+        "responses": ["Artificial Intelligence (AI) refers to the simulation of human intelligence processes by machines, particularly computer systems", "AI encompasses a broad range of techniques and approaches, from simple algorithms to complex neural networks, aimed at enabling machines to perform tasks that typically require human intelligence, such as visual perception, speech recognition, decision-making, and language translation. "]
     },
     {
         "tag": "sub-fields",
@@ -79,7 +79,7 @@ intents = [
     },
     {"tag": "support",
       "patterns": ["What help you can do?", "What are the helps you provide?", "How you could help me", "What support is offered by you"],
-      "responses": [ "ticket booking for airline", "I can help you to book flight tickets easily"],
+      "responses": [ "I can guide you about AI", "I can assist you in understanding basic concepts of AI"],
       "context": [""]
     },
     {"tag": "goodbye",
@@ -89,52 +89,46 @@ intents = [
     }
 ]
 
-
-#A machine learning model called logistic regression will be used to train chatbot
 vectorizer = TfidfVectorizer()
 classifier = LogisticRegression(random_state=0, max_iter=10000)
 tags=[]
 patterns=[]
 for i in intents:
     for pattern in i['patterns']:
-        tags.append(i["tag"])
-        patterns.append(pattern)
-x=vectorizer.fit_transform(patterns)
-y=tags
-classifier.fit(x,y)
+        tags.append(i["tag"])                        #extracting tags from intents
+        patterns.append(pattern)                     #extracting patterns from intents
+x=vectorizer.fit_transform(patterns)                 #declaring x as an independent variable
+y=tags                                               #declaring y as dependent variable
+classifier.fit(x,y)                                  #using x and y to train logistic regression model
 
-def chatbot_response(text):
-    input_text=vectorizer.transform([text])
-    tagsdata=classifier.predict(input_text)[0]
+def chatbot_response(text):                          #defining a function to get chatbot response bases on user_input
+    input_text=vectorizer.transform([text])          #vectoring the input into numerical form
+    tagsdata=classifier.predict(input_text)[0]       #using trained classifier to predict the tag
     for i in intents:
         if i["tag"] == tagsdata:
-            response=random.choice(i['responses'])
+            response=random.choice(i['responses'])   #randomly choosing a response from responses in intents
             return response 
         
 
 st.title('This is chatbot for NeuraPulse AI')
-# Initialize chat history
-if "messages" not in st.session_state:
+
+if "messages" not in st.session_state:              # Initialize chat history
     st.session_state.messages = []
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
+for message in st.session_state.messages:           # Display chat messages from history on app rerun
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# React to user input
-if prompt := st.chat_input("Welcome to Neurapulse"):
-    # Display user message in chat message container
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    # Add user message to chat history
-    st.session_state.messages.append({"role": "user", "content": prompt})
 
+if prompt := st.chat_input("Welcome to Neurapulse"): # React to user input
+    with st.chat_message("user"):                    # Display user message in chat message container
+        st.markdown(prompt)
+    st.session_state.messages.append({"role": "user", "content": prompt})# Add user message to chat history
     response = f"Echo: {prompt}"
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
+   
+    with st.chat_message("assistant"):               # Display assistant response in chat message container
         response=chatbot_response(prompt)
         st.markdown(response)
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": response})
+        
+        st.session_state.messages.append({"role": "assistant", "content": response})# Add assistant response to chat history
 
