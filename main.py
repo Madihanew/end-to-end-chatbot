@@ -112,7 +112,7 @@ def chatbot_response(text):
             return response 
         
 
-st.title('this is chatbot for NeuraPulse AI')
+st.title('This is chatbot for NeuraPulse AI')
 # Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
